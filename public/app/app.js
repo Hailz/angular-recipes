@@ -38,5 +38,9 @@ app.config([
     templateUrl: 'app/views/404.html'
   });
 
-    $locationProvider.html5Mode(true);
-  }]);
+  $locationProvider.html5Mode(true);
+}])
+.config(['$httpProvider', function($httpProvider){
+  $httpProvider.interceptors.push("AuthInterceptor")
+  }])
+

@@ -40,26 +40,53 @@ angular.module('RecipeCtrls', ['RecipeServices'])
     });
   };
 }])
-.controller('NavCtrl', ['$scope', function($scope) {
+.controller('NavCtrl', ['$scope', "$state", "Auth", "Alerts", function($scope, $state, Auth, Alerts) {
+  $scope.isLoggedIn = Auth.isLoggedIn();
   $scope.logout = function() {
-    // to implement
+    console.log("Before logout " + Auth.getToken());
+    Auth.removeToken();
+    console.log("After logout" + Auth.getToken());
+    Alerts.add("success", "You are now logged out!");
+    $state.go("home");
+    Alerts.clear();
   };
 }])
-.controller('SignupCtrl', ['$scope', function($scope) {
+.controller('SignupCtrl', ['$scope', "$http", "$state", "Alerts", function($scope, $http, $state, Alerts) {
   $scope.user = {
     email: '',
     password: ''
   };
   $scope.userSignup = function() {
-    // to implement
+    $http.post('/api/users', $scope.user).then(function success(res){
+      console.log("Signed up! " + res);
+      Alerts.add("success", "You are now signed up!");
+      $state.go("home");
+    }, function error(res){
+      console.log("Failed " + res);
+      Alerts.add("error", "Sign up failed.");
+      Alerts.clear();
+    })
   };
 }])
-.controller('LoginCtrl', ['$scope', function($scope) {
+.controller('LoginCtrl', ['$scope', "$http", "$state", "Auth", "Alerts", function($scope, $http, $state, Auth, Alerts) { //$state.go and $location same. $state uses name of view
   $scope.user = {
     email: '',
     password: ''
   };
   $scope.userLogin = function() {
-    // to implement
+    $http.post("/api/auth", $scope.user).then(function success(res){
+      console.log("Logging " + res);
+      Auth.saveToken(res.data.token);
+      Alerts.add("success", "You are now logged in! " + res.data.user.email);
+      Alerts.clear();
+      $state.go("home");
+    }, function errer(res){
+      console.log("Faaaaaail " + res);
+      Alerts.add("error", "Log in failed.");
+      Alerts.clear();
+    })
   };
+}])
+.controller("AlertsCtrl", ['$scope', 'Alerts', function($scope, Alerts){
+  $scope.alerts= Alerts.get();
 }]);
